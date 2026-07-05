@@ -1,5 +1,22 @@
 # Hex Docking Demo — How to Run
 
+hex_docking/
+├── package.xml
+├── setup.py
+├── setup.cfg
+├── resource/
+│   └── hex_docking
+├── hex_docking/
+│   ├── __init__.py
+│   └── docking_node.py          # docking state machine (FORMATION, FACE_DIST, etc.)
+├── launch/
+│   └── dock_launch.py           # spawns robots, starts Gazebo, bridges topics
+├── models/
+│   └── hex_bot.sdf              # hexagonal robot model (chassis + wheels + plugin)
+└── worlds/
+    └── dock_world.sdf           # empty ground-plane world
+
+  
 Simulation of hex robots docking onto a leader robot to form one connected
 structure.
 
