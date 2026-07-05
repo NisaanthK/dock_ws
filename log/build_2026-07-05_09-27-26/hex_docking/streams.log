@@ -1,0 +1,22 @@
+[5.547s] Invoking command in '/home/nisaanth26/dock_ws/src/hex_docking': PYTHONPATH=/home/nisaanth26/dock_ws/build/hex_docking/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/nisaanth26/dock_ws/install/hex_docking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/hex_docking build --build-base /home/nisaanth26/dock_ws/build/hex_docking/build install --record /home/nisaanth26/dock_ws/build/hex_docking/install.log --single-version-externally-managed install_data
+[7.316s] running egg_info
+[7.320s] writing ../../build/hex_docking/hex_docking.egg-info/PKG-INFO
+[7.372s] writing dependency_links to ../../build/hex_docking/hex_docking.egg-info/dependency_links.txt
+[7.373s] writing entry points to ../../build/hex_docking/hex_docking.egg-info/entry_points.txt
+[7.375s] writing requirements to ../../build/hex_docking/hex_docking.egg-info/requires.txt
+[7.377s] writing top-level names to ../../build/hex_docking/hex_docking.egg-info/top_level.txt
+[7.389s] reading manifest file '../../build/hex_docking/hex_docking.egg-info/SOURCES.txt'
+[7.397s] writing manifest file '../../build/hex_docking/hex_docking.egg-info/SOURCES.txt'
+[7.399s] running build
+[7.399s] running build_py
+[7.405s] running install
+[7.407s] running install_lib
+[7.418s] running install_data
+[7.424s] copying launch/dock.launch.py -> /home/nisaanth26/dock_ws/install/hex_docking/share/hex_docking/launch
+[7.429s] running install_egg_info
+[7.442s] removing '/home/nisaanth26/dock_ws/install/hex_docking/lib/python3.10/site-packages/hex_docking-0.0.1-py3.10.egg-info' (and everything under it)
+[7.446s] Copying ../../build/hex_docking/hex_docking.egg-info to /home/nisaanth26/dock_ws/install/hex_docking/lib/python3.10/site-packages/hex_docking-0.0.1-py3.10.egg-info
+[7.460s] running install_scripts
+[7.595s] Installing docking_node script to /home/nisaanth26/dock_ws/install/hex_docking/lib/hex_docking
+[7.647s] writing list of installed files to '/home/nisaanth26/dock_ws/build/hex_docking/install.log'
+[7.777s] Invoked command in '/home/nisaanth26/dock_ws/src/hex_docking' returned '0': PYTHONPATH=/home/nisaanth26/dock_ws/build/hex_docking/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/nisaanth26/dock_ws/install/hex_docking/lib/python3.10/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py egg_info --egg-base ../../build/hex_docking build --build-base /home/nisaanth26/dock_ws/build/hex_docking/build install --record /home/nisaanth26/dock_ws/build/hex_docking/install.log --single-version-externally-managed install_data

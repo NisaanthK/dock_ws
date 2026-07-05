@@ -1,0 +1,20 @@
+running egg_info
+writing ../../build/hex_docking/hex_docking.egg-info/PKG-INFO
+writing dependency_links to ../../build/hex_docking/hex_docking.egg-info/dependency_links.txt
+writing entry points to ../../build/hex_docking/hex_docking.egg-info/entry_points.txt
+writing requirements to ../../build/hex_docking/hex_docking.egg-info/requires.txt
+writing top-level names to ../../build/hex_docking/hex_docking.egg-info/top_level.txt
+reading manifest file '../../build/hex_docking/hex_docking.egg-info/SOURCES.txt'
+writing manifest file '../../build/hex_docking/hex_docking.egg-info/SOURCES.txt'
+running build
+running build_py
+running install
+running install_lib
+running install_data
+copying models/hex_bot.sdf -> /home/nisaanth26/dock_ws/install/hex_docking/share/hex_docking/models
+running install_egg_info
+removing '/home/nisaanth26/dock_ws/install/hex_docking/lib/python3.10/site-packages/hex_docking-0.0.1-py3.10.egg-info' (and everything under it)
+Copying ../../build/hex_docking/hex_docking.egg-info to /home/nisaanth26/dock_ws/install/hex_docking/lib/python3.10/site-packages/hex_docking-0.0.1-py3.10.egg-info
+running install_scripts
+Installing docking_node script to /home/nisaanth26/dock_ws/install/hex_docking/lib/hex_docking
+writing list of installed files to '/home/nisaanth26/dock_ws/build/hex_docking/install.log'

@@ -1,0 +1,341 @@
+<?xml version="1.0"?>
+<sdf version="1.8">
+  <model name="hex_bot">
+    <pose>0 0 0 0 0 0</pose>
+
+    <link name="chassis">
+      <pose>0 0 0.065 0 0 0</pose>
+
+      <inertial>
+        <mass>1.4</mass>
+        <inertia>
+          <ixx>0.014</ixx>
+          <iyy>0.022</iyy>
+          <izz>0.034</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+
+      <collision name="collision">
+        <geometry>
+          <!-- Was a box. A box's edges bulge past a hexagon's flat faces at the
+               60/120/240/300 deg docking angles (by ~6mm per robot), so the physical
+               collision was touching well before the visual hex faces looked flush.
+               Using the same polyline as visual_body makes collision == visual. -->
+          <polyline>
+            <height>0.06</height>
+            <point>0.156 0.09</point>
+            <point>0.0 0.18</point>
+            <point>-0.156 0.09</point>
+            <point>-0.156 -0.09</point>
+            <point>0.0 -0.18</point>
+            <point>0.156 -0.09</point>
+          </polyline>
+        </geometry>
+      </collision>
+
+      <visual name="visual_body">
+        <geometry>
+          <!-- Vertices rotated 30 deg from the original (which had them at
+               0/60/120/180/240/300). Flat FACES now land on 0/60/120/180/240/300,
+               matching HEX_FACE_ANGLES in docking_node.py. front_marker below is
+               unchanged: local 0 deg used to be a corner, it's a flat face now. -->
+          <polyline>
+            <height>0.06</height>
+            <point>0.156 0.09</point>
+            <point>0.0 0.18</point>
+            <point>-0.156 0.09</point>
+            <point>-0.156 -0.09</point>
+            <point>0.0 -0.18</point>
+            <point>0.156 -0.09</point>
+          </polyline>
+        </geometry>
+        <material>
+          <ambient>0.20 0.20 0.25 1</ambient>
+          <diffuse>0.25 0.25 0.30 1</diffuse>
+          <specular>0.03 0.03 0.03 1</specular>
+        </material>
+      </visual>
+
+      <visual name="front_marker">
+        <pose>0.165 0 0.04 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.030 0.12 0.010</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.90 0.05 0.05 1</ambient>
+          <diffuse>1.00 0.10 0.10 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <link name="left_front_wheel">
+      <pose>0.09 0.07 0.05 1.5708 0 0</pose>
+      <inertial>
+        <mass>0.12</mass>
+        <inertia>
+          <ixx>0.00025</ixx>
+          <iyy>0.00025</iyy>
+          <izz>0.00025</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>4.0</mu>
+              <mu2>4.0</mu2>
+              <slip1>0.02</slip1>
+              <slip2>0.02</slip2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.05 0.05 0.05 1</ambient>
+          <diffuse>0.10 0.10 0.10 1</diffuse>
+          <specular>0.03 0.03 0.03 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <link name="left_rear_wheel">
+      <pose>-0.09 0.07 0.05 1.5708 0 0</pose>
+      <inertial>
+        <mass>0.12</mass>
+        <inertia>
+          <ixx>0.00025</ixx>
+          <iyy>0.00025</iyy>
+          <izz>0.00025</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>4.0</mu>
+              <mu2>4.0</mu2>
+              <slip1>0.02</slip1>
+              <slip2>0.02</slip2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.05 0.05 0.05 1</ambient>
+          <diffuse>0.10 0.10 0.10 1</diffuse>
+          <specular>0.03 0.03 0.03 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <link name="right_front_wheel">
+      <pose>0.09 -0.07 0.05 1.5708 0 0</pose>
+      <inertial>
+        <mass>0.12</mass>
+        <inertia>
+          <ixx>0.00025</ixx>
+          <iyy>0.00025</iyy>
+          <izz>0.00025</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>4.0</mu>
+              <mu2>4.0</mu2>
+              <slip1>0.02</slip1>
+              <slip2>0.02</slip2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.05 0.05 0.05 1</ambient>
+          <diffuse>0.10 0.10 0.10 1</diffuse>
+          <specular>0.03 0.03 0.03 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <link name="right_rear_wheel">
+      <pose>-0.09 -0.07 0.05 1.5708 0 0</pose>
+      <inertial>
+        <mass>0.12</mass>
+        <inertia>
+          <ixx>0.00025</ixx>
+          <iyy>0.00025</iyy>
+          <izz>0.00025</izz>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+        </inertia>
+      </inertial>
+      <collision name="collision">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>4.0</mu>
+              <mu2>4.0</mu2>
+              <slip1>0.02</slip1>
+              <slip2>0.02</slip2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <cylinder>
+            <radius>0.05</radius>
+            <length>0.03</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.05 0.05 0.05 1</ambient>
+          <diffuse>0.10 0.10 0.10 1</diffuse>
+          <specular>0.03 0.03 0.03 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <joint name="left_front_wheel_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>left_front_wheel</child>
+      <axis>
+        <xyz expressed_in="__model__">0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.08</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name="left_rear_wheel_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>left_rear_wheel</child>
+      <axis>
+        <xyz expressed_in="__model__">0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.08</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name="right_front_wheel_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>right_front_wheel</child>
+      <axis>
+        <xyz expressed_in="__model__">0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.08</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <joint name="right_rear_wheel_joint" type="revolute">
+      <parent>chassis</parent>
+      <child>right_rear_wheel</child>
+      <axis>
+        <xyz expressed_in="__model__">0 1 0</xyz>
+        <limit>
+          <lower>-1e16</lower>
+          <upper>1e16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.08</damping>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>left_front_wheel_joint</left_joint>
+      <left_joint>left_rear_wheel_joint</left_joint>
+
+      <right_joint>right_front_wheel_joint</right_joint>
+      <right_joint>right_rear_wheel_joint</right_joint>
+
+      <!-- was 0.33; wheels moved from y = +/-0.165 to y = +/-0.07 (see wheel poses above)
+           so they sit fully inside the hex's flat-face region and never poke past
+           the hex boundary, at any docking angle -->
+      <wheel_separation>0.14</wheel_separation>
+      <wheel_radius>0.05</wheel_radius>
+
+      <frame_id>odom</frame_id>
+      <child_frame_id>chassis</child_frame_id>
+
+      <odom_publish_frequency>10</odom_publish_frequency>
+    </plugin>
+
+  </model>
+</sdf>

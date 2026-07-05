@@ -1,0 +1,3 @@
+[console_scripts]
+docking_node = hex_docking.docking_node:main
+

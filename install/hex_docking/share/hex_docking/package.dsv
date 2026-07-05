@@ -1,0 +1,6 @@
+source;share/hex_docking/hook/pythonpath.ps1
+source;share/hex_docking/hook/pythonpath.dsv
+source;share/hex_docking/hook/pythonpath.sh
+source;share/hex_docking/hook/ament_prefix_path.ps1
+source;share/hex_docking/hook/ament_prefix_path.dsv
+source;share/hex_docking/hook/ament_prefix_path.sh
