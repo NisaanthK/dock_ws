@@ -2,7 +2,7 @@
 
 ## File Structure
 
-\`\`\`
+```bash
 hex_docking/
 ├── package.xml
 ├── setup.py
@@ -18,7 +18,7 @@ hex_docking/
 │   └── hex_bot.sdf          # hexagonal robot model (chassis + wheels + plugin)
 └── worlds/
     └── dock_world.sdf       # empty ground-plane world
-\`\`\`
+```
 
 Simulation of hex robots docking onto a leader robot to form one connected structure.
 
