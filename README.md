@@ -33,7 +33,7 @@ If you're on WSL2, also run this once per terminal you open:
 export LIBGL_ALWAYS_SOFTWARE=1
 ```
 
-## Terminal 1 — start the simulation
+## Terminal 1: start the simulation
 ```bash
 cd ~/dock_ws
 source install/setup.bash
@@ -42,7 +42,7 @@ ros2 launch hex_docking dock.launch.py
 ```
 Wait until the Gazebo window opens and all 9 robots are visible (~10 seconds). Leave this terminal running — don't close it or press Ctrl+C.
 
-## Terminal 2 — start the docking behavior
+## Terminal 2: start the docking behavior
 Open a new terminal, then:
 ```bash
 cd ~/dock_ws
@@ -67,7 +67,7 @@ ros2 run hex_docking docking_node
 Docking is sequential — each robot waits for its anchor to be docked before starting its own approach.
 
 ## Key parameters (`docking_node.py`)
-- `FACE_DIST = 0.312` — target center-to-center docking distance (2× hex apothem, flush contact)
+- `FACE_DIST = 0.33` — target center-to-center docking distance (2× hex apothem, flush contact)
 - `OBSTACLE_RADIUS = 0.22` — collision-avoidance radius used when routing around other docked robots
 - `DOCK_TOL = 0.02` — final position tolerance (2cm) before locking in
 - `ORBIT_LIN_SPEED = 0.2` — speed while circling into position before final approach
