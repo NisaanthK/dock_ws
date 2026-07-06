@@ -1,33 +1,33 @@
 import rclpy, math
 from rclpy.node import Node
 from tf2_msgs.msg import TFMessage
-from ros_gz_interfaces.srv import SetEntityPose
-from ros_gz_interfaces.msg import Entity
-from geometry_msgs.msg import Pose, Twist
+from geometry_msgs.msg import Twist
 
-FACE_DIST       = 0.32
-OBSTACLE_RADIUS = 0.20
+FACE_DIST       = 0.33
+OBSTACLE_RADIUS = 0.22
 SAFE_MARGIN     = 0.6
 HOLD_RADIUS     = FACE_DIST + SAFE_MARGIN + 0.6
-DOCK_TOL        = 0.03
-ORBIT_TOL       = 0.05
+DOCK_TOL        = 0.02
+ORBIT_TOL       = 0.02
+ORBIT_LOOKAHEAD = 0.35     
+HEADING_GATE    = 0.15
 FINAL_YAW_TOL   = 0.05
-STEP_SPEED      = 0.02
-YAW_STEP        = 0.04
-ORBIT_LOOKAHEAD = 0.6
+LIN_SPEED       = 0.15
+ORBIT_LIN_SPEED = 0.2     # constant speed while orbiting -- not distance-throttled
+KP_ANG          = 1.2
+KP_LIN          = 0.6
 
-FACE_ANGLE_OFFSET = math.radians(30)
-HEX_FACE_ANGLES = [
-    math.atan2(math.sin(math.radians(a) + FACE_ANGLE_OFFSET),
-               math.cos(math.radians(a) + FACE_ANGLE_OFFSET))
-    for a in (0, 60, 120, 180, 240, 300)
-]
+HEX_FACE_ANGLES = [math.radians(a) for a in (0, 60, 120, 180, 240, 300)]
 
 FORMATION = [
-    {'name': 'robot2', 'anchor': 'robot1', 'face': 0},
-    {'name': 'robot3', 'anchor': 'robot1', 'face': 1},
-    {'name': 'robot4', 'anchor': 'robot1', 'face': 3},
-    {'name': 'robot5', 'anchor': 'robot1', 'face': 4},
+    {'name': 'robot2', 'anchor': 'robot1', 'face': 1},
+    {'name': 'robot3', 'anchor': 'robot1', 'face': 2},
+    {'name': 'robot4', 'anchor': 'robot1', 'face': 4},
+    {'name': 'robot5', 'anchor': 'robot1', 'face': 5},
+    {'name': 'robot6', 'anchor': 'robot1', 'face': 0},  # 0 deg, right
+    {'name': 'robot7', 'anchor': 'robot3', 'face': 3},  # 180 deg, left
+    {'name': 'robot8', 'anchor': 'robot2', 'face': 1},  # 240 deg, left
+    {'name': 'robot9', 'anchor': 'robot5', 'face': 5},  # 300 deg, left
 ]
 
 ROOT = 'robot1'
@@ -38,10 +38,6 @@ def yaw_from_quat(q):
     siny = 2.0 * (q.w * q.z + q.x * q.y)
     cosy = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
     return math.atan2(siny, cosy)
-
-
-def yaw_to_quat(yaw):
-    return (0.0, 0.0, math.sin(yaw / 2.0), math.cos(yaw / 2.0))
 
 
 def norm_angle(a):
@@ -66,18 +62,12 @@ class DockingNode(Node):
         self.assigned_face = {}
         self.taken_faces = {r: set() for r in ALL_ROBOTS}
         self.active_index = 0
-        self.docked_target = {}
-        self.wheel_pubs = {}
 
         self.create_subscription(TFMessage, '/world/dock_world/pose/info',
                                   self.on_pose_info, 10)
-
-        self.set_pose_client = self.create_client(SetEntityPose, '/world/dock_world/set_pose')
-        self.get_logger().info('Waiting for set_pose service...')
-        self.set_pose_client.wait_for_service()
-        self.get_logger().info('set_pose service ready.')
-
-        self.create_timer(0.03, self.run)
+        self.pubs = {f['name']: self.create_publisher(Twist, f"/{f['name']}/cmd_vel", 10)
+                     for f in FORMATION}
+        self.create_timer(0.1, self.run)
 
     def on_pose_info(self, msg: TFMessage):
         for t in msg.transforms:
@@ -85,32 +75,6 @@ class DockingNode(Node):
                 p = t.transform.translation
                 q = t.transform.rotation
                 self.poses[t.child_frame_id] = (p.x, p.y, yaw_from_quat(q))
-
-    def teleport(self, name, x, y, yaw):
-        if not self.set_pose_client.service_is_ready():
-            return
-        req = SetEntityPose.Request()
-        req.entity = Entity()
-        req.entity.name = name
-        req.entity.type = Entity.MODEL
-        req.pose = Pose()
-        req.pose.position.x = x
-        req.pose.position.y = y
-        req.pose.position.z = 0.1
-        qx, qy, qz, qw = yaw_to_quat(yaw)
-        req.pose.orientation.x = qx
-        req.pose.orientation.y = qy
-        req.pose.orientation.z = qz
-        req.pose.orientation.w = qw
-        future = self.set_pose_client.call_async(req)
-        future.add_done_callback(lambda f: None)
-
-    def spin_wheels(self, name, distance_moved):
-        if name not in self.wheel_pubs:
-            self.wheel_pubs[name] = self.create_publisher(Twist, f'/{name}/cmd_vel', 10)
-        tw = Twist()
-        tw.linear.x = 0.3 if distance_moved > 0.005 else 0.0
-        self.wheel_pubs[name].publish(tw)
 
     def assign_face(self, name, anchor, forced_face):
         if forced_face is not None:
@@ -131,12 +95,12 @@ class DockingNode(Node):
         self.taken_faces[anchor].add(face)
         self.get_logger().info(f'{name} assigned face {face} on {anchor}')
 
-    def path_is_clear(self, name, anchor, start_x, start_y, target_x, target_y):
+    def path_is_clear(self, name, start_x, start_y, target_x, target_y):
         obstacles = []
-        if ROOT in self.poses and ROOT != anchor:
+        if ROOT in self.poses:
             obstacles.append((self.poses[ROOT][0], self.poses[ROOT][1]))
         for other_name, st in self.state.items():
-            if other_name == name or other_name == anchor:
+            if other_name == name:
                 continue
             if st == 'docked' and other_name in self.poses:
                 obstacles.append((self.poses[other_name][0], self.poses[other_name][1]))
@@ -145,25 +109,32 @@ class DockingNode(Node):
                 return False
         return True
 
-    def step_toward(self, name, fx, fy, fyaw, target_x, target_y, keep_yaw=True, target_yaw=None):
+    def drive_toward(self, pub, fx, fy, fyaw, target_x, target_y):
         dx, dy = target_x - fx, target_y - fy
         d = math.hypot(dx, dy)
-        if d < 1e-6:
-            new_x, new_y = fx, fy
+        heading = norm_angle(math.atan2(dy, dx) - fyaw)
+        tw = Twist()
+        if abs(heading) > HEADING_GATE:
+            tw.angular.z = KP_ANG * heading
         else:
-            step = min(STEP_SPEED, d)
-            new_x = fx + dx / d * step
-            new_y = fy + dy / d * step
-
-        new_yaw = fyaw
-        if not keep_yaw and target_yaw is not None:
-            yaw_err = norm_angle(target_yaw - fyaw)
-            yaw_step = max(-YAW_STEP, min(YAW_STEP, yaw_err))
-            new_yaw = norm_angle(fyaw + yaw_step)
-
-        self.teleport(name, new_x, new_y, new_yaw)
-        self.spin_wheels(name, d)
+            tw.linear.x = min(LIN_SPEED, KP_LIN * d)
+            tw.angular.z = KP_ANG * heading * 0.5
+        pub.publish(tw)
         return d
+
+    def drive_orbit(self, pub, fx, fy, fyaw, target_x, target_y):
+        """Like drive_toward but at constant speed -- not throttled by the
+        (deliberately small) distance to the lookahead point, which was
+        causing the near-zero-speed stall."""
+        dx, dy = target_x - fx, target_y - fy
+        heading = norm_angle(math.atan2(dy, dx) - fyaw)
+        tw = Twist()
+        if abs(heading) > HEADING_GATE:
+            tw.angular.z = KP_ANG * heading
+        else:
+            tw.linear.x = ORBIT_LIN_SPEED
+            tw.angular.z = KP_ANG * heading * 0.5
+        pub.publish(tw)
 
     def run(self):
         if self.active_index < len(FORMATION):
@@ -182,12 +153,12 @@ class DockingNode(Node):
                 target_y = ay + FACE_DIST * math.sin(slot_angle)
                 fx, fy, _ = self.poses[name]
 
-                if self.path_is_clear(name, anchor, fx, fy, target_x, target_y):
+                if self.path_is_clear(name, fx, fy, target_x, target_y):
                     self.state[name] = 'approach'
-                    self.get_logger().info(f'{name}: direct path clear, sliding straight in')
+                    self.get_logger().info(f'{name}: direct path clear, skipping orbit')
                 else:
                     self.state[name] = 'transit_out'
-                    self.get_logger().info(f'{name}: path blocked, routing around {anchor}')
+                    self.get_logger().info(f'{name}: path blocked, orbiting around {anchor}')
 
             if self.state[name] == 'docked':
                 self.active_index += 1
@@ -203,14 +174,16 @@ class DockingNode(Node):
             face_idx = self.assigned_face[name]
             slot_angle = HEX_FACE_ANGLES[face_idx]
             fx, fy, fyaw = self.poses[name]
+            pub = self.pubs[name]
 
             if self.state[name] == 'transit_out':
                 theta = math.atan2(fy - ay, fx - ax)
                 target_x = ax + HOLD_RADIUS * math.cos(theta)
                 target_y = ay + HOLD_RADIUS * math.sin(theta)
-                d = self.step_toward(name, fx, fy, fyaw, target_x, target_y)
+                d = self.drive_toward(pub, fx, fy, fyaw, target_x, target_y)
                 if d <= ORBIT_TOL:
                     self.state[name] = 'orbit'
+                    pub.publish(Twist())
                 continue
 
             if self.state[name] == 'orbit':
@@ -220,6 +193,7 @@ class DockingNode(Node):
 
                 if abs(err) <= ORBIT_TOL and current_radius >= HOLD_RADIUS - 0.15:
                     self.state[name] = 'approach'
+                    pub.publish(Twist())
                     continue
 
                 lookahead = min(ORBIT_LOOKAHEAD, abs(err))
@@ -227,7 +201,7 @@ class DockingNode(Node):
                 next_theta = norm_angle(current_bearing + lookahead)
                 target_x = ax + HOLD_RADIUS * math.cos(next_theta)
                 target_y = ay + HOLD_RADIUS * math.sin(next_theta)
-                self.step_toward(name, fx, fy, fyaw, target_x, target_y)
+                self.drive_orbit(pub, fx, fy, fyaw, target_x, target_y)
 
                 self.get_logger().info(
                     f'{name} orbiting {anchor} | angle_err={err:.2f} r={current_radius:.2f}',
@@ -237,9 +211,10 @@ class DockingNode(Node):
             if self.state[name] == 'approach':
                 target_x = ax + FACE_DIST * math.cos(slot_angle)
                 target_y = ay + FACE_DIST * math.sin(slot_angle)
-                d = self.step_toward(name, fx, fy, fyaw, target_x, target_y)
+                d = self.drive_toward(pub, fx, fy, fyaw, target_x, target_y)
                 if d <= DOCK_TOL:
                     self.state[name] = 'align'
+                    pub.publish(Twist())
                 self.get_logger().info(f'{name} -> {anchor} approach | dist={d:.2f}',
                                         throttle_duration_sec=1.0)
                 continue
@@ -249,23 +224,12 @@ class DockingNode(Node):
                 yaw_err = norm_angle(target_yaw - fyaw)
                 if abs(yaw_err) <= FINAL_YAW_TOL:
                     self.state[name] = 'docked'
-                    self.docked_target[name] = (
-                        ax + FACE_DIST * math.cos(slot_angle),
-                        ay + FACE_DIST * math.sin(slot_angle),
-                        target_yaw,
-                    )
+                    pub.publish(Twist())
                     self.get_logger().info(f'DOCKED! {name} flush on face {face_idx} of {anchor}')
-                    self.spin_wheels(name, 0.0)
                     continue
-                self.step_toward(name, fx, fy, fyaw, fx, fy, keep_yaw=False, target_yaw=target_yaw)
-
-        for entry in FORMATION:
-            name = entry['name']
-            if self.state[name] == 'docked' and name in self.docked_target and name in self.poses:
-                tx, ty, tyaw = self.docked_target[name]
-                cx, cy, _ = self.poses[name]
-                if math.hypot(cx - tx, cy - ty) > 0.02:
-                    self.teleport(name, tx, ty, tyaw)
+                tw = Twist()
+                tw.angular.z = KP_ANG * yaw_err
+                pub.publish(tw)
 
 
 def main():
