@@ -21,17 +21,21 @@ def generate_launch_description():
     ])
 
     robots = [
-        {'name': 'robot1', 'x': '0.0',  'y': '0.0'},
-        {'name': 'robot2', 'x': '2.5',  'y': '0.0'},
-        {'name': 'robot3', 'x': '-2.5', 'y': '0.0'},
-        {'name': 'robot4', 'x': '0.0',  'y': '2.5'},
-        {'name': 'robot5', 'x': '0.0',  'y': '-2.5'},
-    ]
+    {'name': 'robot1', 'x': '0.0',  'y': '0.0'},
+    {'name': 'robot2', 'x': '2.5',  'y': '0.0'},
+    {'name': 'robot3', 'x': '-2.5', 'y': '0.0'},
+    {'name': 'robot4', 'x': '0.0',  'y': '2.5'},
+    {'name': 'robot5', 'x': '0.0',  'y': '-2.5'},
+    {'name': 'robot6', 'x': '4.0',  'y': '0.0'},
+    {'name': 'robot7', 'x': '-4.0', 'y': '0.0'},
+    {'name': 'robot8', 'x': '5.0',  'y': '1.5'},
+    {'name': 'robot9', 'x': '5.0',  'y': '-1.5'},
+]
 
-    actions = [
-        SetEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', resource_path),
-        SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', resource_path),
-    ]
+    # start with a generic list so different action types can be appended
+    actions = []
+    actions.append(SetEnvironmentVariable('IGN_GAZEBO_RESOURCE_PATH', resource_path))
+    actions.append(SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', resource_path))
 
     actions.append(IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
