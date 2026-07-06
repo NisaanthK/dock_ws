@@ -3,7 +3,7 @@
 Simulation of hex robots docking onto a leader robot to form a honeycomb structure.
 
 ## File Structure
-\`\`\`
+```bash
 hex_docking/
 ├── package.xml
 ├── setup.py
@@ -19,36 +19,36 @@ hex_docking/
 │   └── hex_bot.sdf          # hexagonal robot model (chassis + wheels + plugin)
 └── worlds/
     └── dock_world.sdf       # empty ground-plane world
-\`\`\`
+```
 
 ## Setup (one time)
-\`\`\`bash
+```bash
 cd ~/dock_ws        # wherever you clone this repo into
 colcon build
 source install/setup.bash
-\`\`\`
+```
 
 If you're on WSL2, also run this once per terminal you open:
-\`\`\`bash
+```bash
 export LIBGL_ALWAYS_SOFTWARE=1
-\`\`\`
+```
 
 ## Terminal 1 — start the simulation
-\`\`\`bash
+```bash
 cd ~/dock_ws
 source install/setup.bash
 export LIBGL_ALWAYS_SOFTWARE=1
 ros2 launch hex_docking dock.launch.py
-\`\`\`
+```
 Wait until the Gazebo window opens and all 9 robots are visible (~10 seconds). Leave this terminal running — don't close it or press Ctrl+C.
 
 ## Terminal 2 — start the docking behavior
 Open a new terminal, then:
-\`\`\`bash
+```bash
 cd ~/dock_ws
 source install/setup.bash
 ros2 run hex_docking docking_node
-\`\`\`
+```
 
 ## Formation
 9 robots total: robot1 is the fixed leader. Each satellite docks to a specific hex face of its assigned anchor:
