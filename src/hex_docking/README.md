@@ -73,6 +73,6 @@ finishes.
   and run both terminals again.
 - **Want to change spacing (gap between docked robots)** -> same file, find:
   ```python
-  FACE_DIST = 0.312    # was 0.45 -- now 2 x apothem (0.18*cos30 = 0.156) so hex faces meet flush
+  FACE_DIST = 0.33    # was 0.45 -- now 2 x apothem (0.18*cos30 = 0.156) so hex faces meet flush
   ```
   Smaller number = tighter fit. Rebuild after changing.
